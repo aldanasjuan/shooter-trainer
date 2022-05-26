@@ -33,7 +33,7 @@
 
 	function setDefaults(){
 		$config = defaultOptions
-		restart()
+		setTimeout(restart, 50)
 	}
 	 
 	function getAverage(values, round = true){

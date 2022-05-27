@@ -222,14 +222,14 @@
 </style>
 
 <div class="container">
-	<main style="width: {$config.screenX}px;height:{$config.screenY}px; cursor: url('/crosshair-{[1,2,3,4].includes($config.crosshair) ? $config.crosshair : 1}.png') 12 12, auto;" on:click={handleMisses}>
+	<main style="width: {$config.screenX}px;height:{$config.screenY}px; cursor: url('/crosshair-{[1,2,3,4].includes($config.crosshair) ? $config.crosshair : 1}.png') 12 12, auto;" on:mousedown={handleMisses}>
 		{#key lastResult}
 			<h1 class="result" style="color:rgb(255,0,0,0.4)">
 				{lastResult || ""}{lastMisses !== null ? ` - ${lastMisses}` : ""}
 			</h1>
 		{/key}	
 		<svg bind:this={svg}>
-			<circle id="dot" style="transition:transform {$config.moveSpeed}ms ease-in-out;transform: translate({moveX}px, {moveY}px);"  bind:this={dot} on:click={handleClick} r={$config.size} fill="red"/>
+			<circle id="dot" style="transition:transform {$config.moveSpeed}ms ease-in-out;transform: translate({moveX}px, {moveY}px);"  bind:this={dot} on:mousedown={handleClick} r={$config.size} fill="red"/>
 		</svg>
 	</main>
 	<div class="content">

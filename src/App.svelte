@@ -108,6 +108,7 @@
 		lastResult = null
 		lastMisses = null
 		once = false
+		misses = 0
 		moveX = 0
 		moveY = 0
 		results = []

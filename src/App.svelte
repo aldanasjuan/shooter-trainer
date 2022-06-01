@@ -172,7 +172,7 @@
 		openProfile = true
 	}
 	function confirmSaveProfile(){
-		$profiles[currentProfileName] = $config
+		$profiles[currentProfileName] = JSON.parse(JSON.stringify($config))
 		openProfile = false
 		saveWarning = false
 	}

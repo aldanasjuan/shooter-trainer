@@ -161,7 +161,7 @@
 	}
 	function loadProfile(){
 		if($profiles[$profileToLoad]){
-			$config = $profiles[$profileToLoad]
+			$config = JSON.parse(JSON.stringify($profiles[$profileToLoad]))
 			loadProfileModal = false
 			currentProfileName = $profileToLoad
 			setTimeout(restart, 50)

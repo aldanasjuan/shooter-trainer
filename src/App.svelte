@@ -1,5 +1,6 @@
 
 <script>
+	import Modal from "./Modal.svelte"
 	import {newLocalStore} from "./store"
 	import {onMount} from "svelte"
 	const defaultOptions = {
@@ -13,7 +14,12 @@
 		movePause: 100,
 		crosshair: 1,
 	}
+	let openProfile = false
+	let loadProfileModal = false
 	let config = newLocalStore("config", defaultOptions)
+	let profileToLoad = newLocalStore("currentProfile", "")
+	let currentProfileName = $profileToLoad
+	let profiles = newLocalStore("profiles", {})
 	let moveX = 0
 	let moveY = 0
 	let svg
@@ -30,8 +36,12 @@
 	let cooldown = false
 	let moveInterval
 	let moveTimeout
-
+	let saveWarning = false
+	let deleteWarning = false
+	
 	function setDefaults(){
+		$profileToLoad = ""
+		currentProfileName = ""
 		$config = defaultOptions
 		setTimeout(restart, 50)
 	}
@@ -146,6 +156,53 @@
 		}, 750)
 	}
 
+	function openLoadProfile(){
+		loadProfileModal = true
+	}
+	function loadProfile(){
+		if($profiles[$profileToLoad]){
+			$config = $profiles[$profileToLoad]
+			loadProfileModal = false
+			currentProfileName = $profileToLoad
+			setTimeout(restart, 50)
+		}
+	}
+
+	function saveProfileModal(){
+		openProfile = true
+	}
+	function confirmSaveProfile(){
+		$profiles[currentProfileName] = $config
+		openProfile = false
+		saveWarning = false
+	}
+	function cancelSave(){
+		saveWarning = false
+	}
+	function deleteProfile(){
+		deleteWarning = true
+	}
+	function saveProfile(){
+		if(!currentProfileName)return
+		if($profiles[currentProfileName]){
+			saveWarning = true
+		}else{
+			$profiles[currentProfileName] = $config
+			openProfile = false
+		}
+	}
+	function confirmDeleteProfile(){
+		if(!$profileToLoad)return
+		delete $profiles[$profileToLoad]
+		$profiles = $profiles
+		deleteWarning = false
+		loadProfileModal = false
+		$profileToLoad = ""
+	}
+	function cancelDelete(){
+		deleteWarning = false
+	}
+
 	$:{
 		updateInterval($config.moveSpeed, $config.movePause)
 	}
@@ -209,7 +266,9 @@
 		padding: 0 8px;
 		cursor:pointer;
 		text-align:center;
-
+	}
+	button, select{
+		width:100%;
 	}
 	
 	@keyframes out{
@@ -234,6 +293,7 @@
 		</svg>
 	</main>
 	<div class="content">
+		<h3>Profile: <span style="color:rgb(255,0,0,0.4)">{currentProfileName || "-"}</span></h3>
 		<h3>
 			Avg Speed: <span style="color:rgb(255,0,0,0.4)">{lastResult ? getAverage(results) : "Click red dot to start"} </span><br/>
 		</h3>
@@ -293,6 +353,13 @@
 					<input type="number" bind:value={$config.movePause}/>
 				</label>	
 			{/if}
+
+			<button style="grid-column: 1 / -1" on:click={openLoadProfile}>
+				Load Profile
+			</button>
+			<button style="grid-column: 1 / -1" on:click={saveProfileModal}>
+				Save Profile
+			</button>
 			<button style="grid-column: 1 / -1" on:click={setDefaults}>
 				Set to default
 			</button>
@@ -300,3 +367,52 @@
 	</div>
 
 </div>
+
+
+<Modal bind:open={openProfile} closeOnBackdrop style="padding:32px; background-color:white;">	
+	{#if saveWarning}
+		<p>The profile <strong>{currentProfileName}</strong> already exists, do you want to overwrite?</p>
+		<button on:click={confirmSaveProfile}>
+			Confirm
+		</button>	
+		<button on:click={cancelSave}>
+			Cancel
+		</button>	
+	{:else}
+		<label>Profile Name
+			<input bind:value={currentProfileName}/>
+		</label>
+		<button on:click={saveProfile}>
+			Save
+		</button>	
+	{/if}
+</Modal>
+
+<Modal bind:open={loadProfileModal} closeOnBackdrop style="padding:32px; background-color:white;">	
+	{#if deleteWarning}
+		<p>Delete <strong>{$profileToLoad}</strong>?</p>
+		<button on:click={confirmDeleteProfile}>
+			Confirm
+		</button>	
+		<button on:click={cancelDelete}>
+			Cancel
+		</button>	
+	{:else}
+		<label>
+			Profiles<br/>
+			<select bind:value={$profileToLoad}>
+				{#each Object.keys($profiles) as profile}
+					<option value={profile}>
+						{profile}
+					</option>
+				{/each}
+			</select>
+		</label>
+		<button on:click={loadProfile}>
+			Load
+		</button>	
+		<button on:click={deleteProfile}>
+			Delete
+		</button>	
+	{/if}
+</Modal>
